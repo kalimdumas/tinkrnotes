@@ -107,10 +107,10 @@ export async function addComment(
   parentId: number | null,
   text: string,
   author = CURRENT_USER
-) {
-  if (!isClient || !db) return;
+): Promise<Comment | null> {
+  if (!isClient || !db) return null;
   const now = new Date();
-  await db.comments.add({
+  const payload: Comment = {
     noteId,
     parentId,
     author,
@@ -119,7 +119,9 @@ export async function addComment(
     isPrimaryChild: false,
     archived: false,
     archivedAt: null,
-  } as Comment);
+  };
+  const id = await db.comments.add(payload as any);
+  return { ...payload, id } as Comment;
 }
 
 export async function listComments(noteId: number, parentId: number | null, archived = false) {

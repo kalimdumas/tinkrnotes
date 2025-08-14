@@ -34,7 +34,7 @@ export function Notestack(props: {
   return (
     <div
       class="border rounded bg-white shadow-sm"
-      style="border:1px solid #d1d5db; border-radius:8px; background:#ffffff;"
+      style="border:1px solid #d1d5db; border-radius:8px; background:#ffffff; overflow:hidden;"  // ⬅ NEW: overflow hidden
     >
       <div class="p-3 flex items-start justify-between">
         <div class="min-w-0">

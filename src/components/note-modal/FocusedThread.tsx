@@ -1,10 +1,6 @@
-import { Show, createResource, createSignal } from 'solid-js';
+import { Show, createResource } from 'solid-js';
 import type { Comment } from '../../lib/db';
-import {
-  addComment,
-  currentUser,
-  getCommentById,
-} from '../../lib/data';
+import { getCommentById } from '../../lib/data';
 import { CommentNodeList } from './CommentNodeList';
 
 export function FocusedThread(props: {
@@ -16,15 +12,6 @@ export function FocusedThread(props: {
     () => props.rootId,
     async (id) => getCommentById(id)
   );
-
-  const [reply, setReply] = createSignal('');
-  async function addReply() {
-    const t = reply().trim();
-    const r = root();
-    if (!t || !r) return;
-    await addComment(r.noteId, r.id!, t);
-    setReply('');
-  }
 
   return (
     <Show when={root()}>
@@ -41,27 +28,14 @@ export function FocusedThread(props: {
         </div>
         <div class="mt-1">{root()!.text}</div>
 
-        {/* Reply to the focused root */}
-        <div class="mt-2">
-          <textarea
-            class="w-full border rounded p-2 resize-none"
-            rows={2}
-            placeholder="Reply to this thread…"
-            value={reply()}
-            onInput={(e) => setReply(e.currentTarget.value)}
-          />
-          <div class="mt-1 flex gap-2">
-            <button class="px-2 py-1 border rounded text-sm" onClick={addReply}>Post reply</button>
-          </div>
-        </div>
-
-        {/* Children (recursive), with primary-thread button only on first layer */}
+        {/* Children (recursive), with reply box for the focused parent */}
         <div class="mt-3">
           <div class="font-semibold text-sm mb-1">Replies</div>
           <CommentNodeList
             parent={root() as Comment}
             allowShowPrimaryForChildren={true}
             onShowPrimaryThread={props.onShowPrimaryThread}
+            showReplyBoxForParent={true}  // <-- reply here uses optimistic path
           />
         </div>
       </div>

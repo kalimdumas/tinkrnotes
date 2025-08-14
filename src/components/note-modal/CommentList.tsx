@@ -1,37 +1,71 @@
-import { For, createResource, createSignal, Show } from 'solid-js';
+import { For, Show, createResource, createSignal } from 'solid-js';
 import type { Comment } from '../../lib/db';
-import { addComment, listComments, currentUser, archiveCommentCascade, listArchivedTopLevel } from '../../lib/data';
+import {
+  addComment,
+  listComments,
+  currentUser,
+  archiveCommentCascade,
+  listArchivedTopLevel,
+} from '../../lib/data';
 import { ArchivedList } from './ArchivedList';
 
 export function CommentList(props: {
   noteId: number;
-  parentId: number | null;    // for this top-level list we pass null
+  parentId: number | null; // top-level = null
   onFocus: (id: number) => void;
 }) {
-  const [items, { refetch }] = createResource(
+  const [items, { refetch, mutate }] = createResource(
     () => [props.noteId, props.parentId] as const,
     async () => listComments(props.noteId, props.parentId, /* archived */ false)
   );
 
   const [newText, setNewText] = createSignal('');
+
   async function add() {
     const t = newText().trim();
     if (!t) return;
-    await addComment(props.noteId, props.parentId, t);
+
+    // Optimistic insert
+    const temp: Comment = {
+      id: -Date.now(), // temp id
+      noteId: props.noteId,
+      parentId: props.parentId,
+      author: currentUser(),
+      text: t,
+      createdAt: new Date(),
+      isPrimaryChild: false,
+      archived: false,
+      archivedAt: null,
+    };
+    mutate((prev) => ([...(prev || []), temp]));
+
     setNewText('');
-    await refetch();
+
+    // Persist then swap temp with real
+    const saved = await addComment(props.noteId, props.parentId, t);
+    if (saved) {
+      mutate((prev) => (prev || []).map(c => c.id === temp.id ? saved : c));
+    } else {
+      // rollback if failed
+      mutate((prev) => (prev || []).filter(c => c.id !== temp.id));
+    }
   }
 
   async function archiveThread(id: number, author: string) {
     if (author !== currentUser()) return;
     if (!confirm('Archive this thread and all its subreplies?')) return;
+
+    // Optimistic remove from active list
+    mutate((prev) => (prev || []).filter(c => c.id !== id));
+
+    // Persist archive cascade
     await archiveCommentCascade(id);
-    await refetch();
+    // (No refetch needed; archived list loads on demand)
   }
 
   return (
     <div>
-      {/* New comment input */}
+      {/* New top-level comment */}
       <div class="mb-2">
         <textarea
           class="w-full border rounded p-2 resize-none"
