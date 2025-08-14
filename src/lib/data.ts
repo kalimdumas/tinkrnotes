@@ -73,7 +73,7 @@ export async function listNotesForStack(stackId: number, sort: NoteSortKey) {
 
 export function extractTitle(markdown: string): string {
   const line = (markdown.split('\n').find(l => l.trim().length > 0) || '').trim();
-  return line.replace(/^#+\s*/, '') || '(untitled)';
+  return line.replace(/^#+\s*/, '') || '(no content)';
 }
 
 export async function createNoteInStack(stackId: number) {

@@ -16,9 +16,7 @@ export function Note(props: {
               props.row.isTitleCard ? 'bg-amber-200' : 'bg-gray-200'
             }`}
           >
-            {props.row.isTitleCard ? 'TITLE CARD' : 'NOTE'}
           </span>
-          {/* Title that never bleeds outside the border */}
           <span
             class="font-medium"
             style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; word-break:break-word; overflow-wrap:anywhere; vertical-align:bottom;"
