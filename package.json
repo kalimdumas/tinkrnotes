@@ -1,0 +1,30 @@
+{
+  "name": "example-basic",
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start",
+    "version": "vinxi version"
+  },
+  "dependencies": {
+    "@kobalte/core": "^0.13.11",
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.0",
+    "@solidjs/start": "^1.1.0",
+    "@tanstack/solid-query": "^5.85.3",
+    "dexie": "^4.0.11",
+    "dompurify": "^3.2.6",
+    "marked": "^16.1.2",
+    "pocketbase": "^0.26.2",
+    "solid-js": "^1.9.5",
+    "vinxi": "^0.5.7"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.2.0",
+    "vite-plugin-pwa": "^1.0.2"
+  }
+}
