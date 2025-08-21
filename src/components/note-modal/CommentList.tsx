@@ -1,118 +1,42 @@
-import { For, Show, createResource, createSignal } from 'solid-js';
+import { For, createResource } from 'solid-js';
 import type { Comment } from '../../lib/db';
-import {
-  addComment,
-  listComments,
-  currentUser,
-  archiveCommentCascade,
-  listArchivedTopLevel,
-} from '../../lib/data';
-import { ArchivedList } from './ArchivedList';
+import { addComment, listComments, currentUser } from '../../lib/data';
+import { CommentComposer } from '../comments/CommentComposer';
+import { CommentNode } from './CommentNodeList';
 
 export function CommentList(props: {
   noteId: number;
-  parentId: number | null; // top-level = null
+  parentId: number | null;
   onFocus: (id: number) => void;
 }) {
-  const [items, { refetch, mutate }] = createResource(
+  const [items, { mutate }] = createResource(
     () => [props.noteId, props.parentId] as const,
-    async () => listComments(props.noteId, props.parentId, /* archived */ false)
+    async () => listComments(props.noteId, props.parentId)
   );
 
-  const [newText, setNewText] = createSignal('');
-
-  async function add() {
-    const t = newText().trim();
-    if (!t) return;
-
-    // Optimistic insert
-    const temp: Comment = {
-      id: -Date.now(), // temp id
-      noteId: props.noteId,
-      parentId: props.parentId,
-      author: currentUser(),
-      text: t,
-      createdAt: new Date(),
-      isPrimaryChild: false,
-      archived: false,
-      archivedAt: null,
-    };
-    mutate((prev) => ([...(prev || []), temp]));
-
-    setNewText('');
-
-    // Persist then swap temp with real
-    const saved = await addComment(props.noteId, props.parentId, t);
-    if (saved) {
-      mutate((prev) => (prev || []).map(c => c.id === temp.id ? saved : c));
-    } else {
-      // rollback if failed
-      mutate((prev) => (prev || []).filter(c => c.id !== temp.id));
-    }
-  }
-
-  async function archiveThread(id: number, author: string) {
-    if (author !== currentUser()) return;
-    if (!confirm('Archive this thread and all its subreplies?')) return;
-
-    // Optimistic remove from active list
-    mutate((prev) => (prev || []).filter(c => c.id !== id));
-
-    // Persist archive cascade
-    await archiveCommentCascade(id);
-    // (No refetch needed; archived list loads on demand)
+  async function addTopLevel(text: string) {
+    const temp: Comment = { id: -Date.now(), noteId: props.noteId, parentId: null, author: currentUser(), text, createdAt: new Date(), isPrimaryChild: false, archived: false, archivedAt: null };
+    mutate(p => ([...(p || []), temp]));
+    const saved = await addComment(props.noteId, null, text);
+    if (saved) mutate(p => (p || []).map(c => c.id === temp.id ? saved : c)); else mutate(p => (p || []).filter(c => c.id !== temp.id));
   }
 
   return (
     <div>
-      {/* New top-level comment */}
-      <div class="mb-2">
-        <textarea
-          class="w-full border rounded p-2 resize-none"
-          rows={2}
-          placeholder="Add a top-level comment…"
-          value={newText()}
-          onInput={(e) => setNewText(e.currentTarget.value)}
-        />
-        <div class="mt-1 flex gap-2">
-          <button class="px-2 py-1 border rounded text-sm" onClick={add}>Post</button>
-        </div>
-      </div>
-
-      {/* Active threads */}
-      <ul class="space-y-2">
+      <CommentComposer placeholder="Add a top-level comment…" onSubmit={addTopLevel} />
+      <div class="space-y-3 mt-2">
         <For each={(items() as Comment[]) || []}>
           {(c) => (
-            <li class="border rounded p-2 bg-gray-50">
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <div class="text-sm">
-                    <span class="font-semibold">{c.author}</span>{' '}
-                    <span class="text-gray-500 text-xs">{c.createdAt.toLocaleString()}</span>
-                  </div>
-                  <div class="mt-1">{c.text}</div>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <button class="px-2 py-0.5 border rounded text-xs" onClick={() => props.onFocus(c.id!)}>
-                    Focus
-                  </button>
-                  <Show when={c.author === currentUser()}>
-                    <button class="px-2 py-0.5 border rounded text-xs" onClick={() => archiveThread(c.id!, c.author)}>
-                      Archive
-                    </button>
-                  </Show>
-                </div>
-              </div>
-            </li>
+            <CommentNode
+              comment={c}
+              parentAuthor={null}
+              showFocusButton
+              onFocus={() => props.onFocus(c.id!)}
+              onShowPrimaryThread={() => {}}
+            />
           )}
         </For>
-      </ul>
-
-      {/* Archived threads (note-level) */}
-      <ArchivedList
-        label="Archived threads"
-        load={async () => listArchivedTopLevel(props.noteId)}
-      />
+      </div>
     </div>
   );
 }

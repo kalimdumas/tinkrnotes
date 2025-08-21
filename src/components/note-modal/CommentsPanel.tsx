@@ -3,7 +3,6 @@ import type { Comment as CommentModel } from '../../lib/db';
 import { computePrimaryThreadFrom } from '../../lib/data';
 import { CommentList } from './CommentList';
 import { FocusedThread } from './FocusedThread';
-import { PrimaryThreadPreview } from './PrimaryThreadPreview';
 
 export function CommentsPanel(props: {
   noteId: number;
@@ -12,7 +11,7 @@ export function CommentsPanel(props: {
   primaryPreview: CommentModel[] | null;
   onSetPrimaryPreview: (list: CommentModel[] | null) => void;
 }) {
-  async function handleShowPrimaryThread(childId: number) {
+  async function showPrimary(childId: number) {
     const path = await computePrimaryThreadFrom(childId);
     props.onSetPrimaryPreview(path);
   }
@@ -22,10 +21,7 @@ export function CommentsPanel(props: {
       <div class="p-2" style="border-bottom:1px solid #eee; display:flex; gap:8px; align-items:center;">
         <div class="font-semibold">Comments</div>
         <Show when={props.focusedId !== null}>
-          <button
-            class="px-2 py-1 border rounded text-sm"
-            onClick={() => { props.onFocusChange(null); props.onSetPrimaryPreview(null); }}
-          >
+          <button class="px-2 py-1 border rounded text-sm" onClick={() => { props.onFocusChange(null); props.onSetPrimaryPreview(null); }}>
             Show primary (top-level) thread list
           </button>
         </Show>
@@ -34,22 +30,19 @@ export function CommentsPanel(props: {
       <div style="flex:1; overflow:auto; padding:8px 10px;">
         <Show
           when={props.focusedId === null}
-          fallback={
-            <FocusedThread
-              rootId={props.focusedId!}
-              onBack={() => { props.onFocusChange(null); props.onSetPrimaryPreview(null); }}
-              onShowPrimaryThread={handleShowPrimaryThread}
-            />
-          }
+          fallback={<FocusedThread rootId={props.focusedId!} onBack={() => props.onFocusChange(null)} onShowPrimaryThread={showPrimary} />}
         >
-          <CommentList
-            noteId={props.noteId}
-            parentId={null}
-            onFocus={(id) => { props.onFocusChange(id); props.onSetPrimaryPreview(null); }}
-          />
+          <CommentList noteId={props.noteId} parentId={null} onFocus={(id) => { props.onFocusChange(id); props.onSetPrimaryPreview(null); }} />
         </Show>
 
-        <PrimaryThreadPreview list={props.primaryPreview} />
+        <Show when={props.primaryPreview}>
+          <div class="mt-3 border rounded p-2 bg-amber-50">
+            <div class="text-sm font-semibold mb-1">Primary thread preview</div>
+            <ol class="text-sm space-y-1">
+              {props.primaryPreview!.map((c, i) => <li><span class="text-gray-500">[{i + 1}]</span> {c.text}</li>)}
+            </ol>
+          </div>
+        </Show>
       </div>
     </div>
   );

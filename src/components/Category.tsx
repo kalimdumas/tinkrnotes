@@ -9,17 +9,19 @@ export function Category(props: {
   stackSort: StackSortKey;
   noteSort: NoteSortKey;
   onOpenNote: (noteId: number) => void;
+  onOpenStack: (stackId: number) => void;
 }) {
-  const [stacks, { refetch }] = createResource(
+  const [stacks, { mutate }] = createResource(
     () => [props.category.id, props.stackSort] as const,
     async () => listStacksByCategory(props.category.id!, props.stackSort)
   );
 
   async function addStack() {
-    const title = window.prompt('New notestack title?');
-    if (!title) return;
-    await createStackWithTitleCard(props.category.id!, title);
-    await refetch();
+    const title = window.prompt('New notestack title?'); if (!title) return;
+    const temp: NotestackModel = { id: -Date.now(), title, categoryId: props.category.id!, createdAt: new Date(), updatedAt: new Date() };
+    mutate(prev => ([...(prev || []), temp]));
+    const id = await createStackWithTitleCard(props.category.id!, title);
+    mutate(prev => (prev || []).map(s => s.id === temp.id ? { ...temp, id } : s));
   }
 
   return (
@@ -28,14 +30,12 @@ export function Category(props: {
         <h3 class="font-semibold">{props.category.name}</h3>
         <button class="text-sm px-2 py-1 border rounded" onClick={addStack}>+ New</button>
       </div>
-
       <div class="space-y-3">
         <For each={(stacks() as NotestackModel[]) || []}>
           {(stk) => (
             <Notestack
               stack={stk}
-              noteSort={props.noteSort}
-              onOpenNote={props.onOpenNote}
+              onOpen={() => props.onOpenStack(stk.id!)}
             />
           )}
         </For>

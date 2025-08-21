@@ -1,0 +1,44 @@
+/* Auto-created by postinstall to ensure horizontal columns */
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+
+.board{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:20rem;
+  gap:16px;
+  overflow-x:auto;
+  padding:8px 12px 12px;
+  align-items:start;
+}
+.column{min-width:20rem}
+
+.stack{border:1px solid #ddd;border-radius:8px;background:#fff;margin-bottom:12px;overflow:hidden}
+.stack .row{padding:12px;display:flex;justify-content:space-between;align-items:start}
+.stack .meta{font-size:12px;color:#666;margin-top:2px}
+
+.btn{border:1px solid #bbb;padding:4px 8px;border-radius:6px;background:#fafafa;cursor:pointer}
+.btn:hover{background:#f0f0f0}
+
+/* Prevent long text from bleeding outside cards */
+li, .note, .stack, .column{
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+/* Ghost buttons */
+.btn-ghost{ border:1px solid #e5e7eb; background:#f9fafb; padding:4px 8px; border-radius:6px; font-size:12px; line-height:1; cursor:pointer }
+.btn-ghost:hover{ background:#f3f4f6 }
+
+/* Notestack "stack of notes" look */
+.stackCard{
+  position:relative; border:1px solid #d1d5db; border-radius:8px; background:#ffffff; box-shadow:0 1px 0 rgba(0,0,0,0.04);
+}
+.stackCard::before, .stackCard::after{
+  content:""; position:absolute; inset:0; border:1px solid #e5e7eb; border-radius:8px; background:#fff; z-index:-1;
+}
+.stackCard::before{ top:4px; left:4px; right:-4px; bottom:-4px; }
+.stackCard::after{ top:8px; left:8px; right:-8px; bottom:-8px; }
+
+/* Prevent bleed */
+.stackCard, .column li, .note, .stack { overflow:hidden; word-break:break-word; overflow-wrap:anywhere; }
