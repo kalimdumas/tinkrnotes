@@ -2,18 +2,14 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "moduleResolution": "Bundler",
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "allowJs": true,
+    "types": ["vite/client"],
     "strict": true,
     "noEmit": true,
-    "types": ["vinxi/types/client"],
     "isolatedModules": true,
-    "paths": {
-      "~/*": ["./src/*"]
-    }
-  }
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }

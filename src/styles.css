@@ -1,0 +1,28 @@
+:root{--fg:#111827;--muted:#6b7280;--line:#e5e7eb;--bg:#ffffff}
+*{box-sizing:border-box} html,body,#app{height:100%} body{margin:0;background:#fafafa;color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+
+/* Layout */
+.row{display:flex;align-items:center;gap:8px}
+.spread{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:#fff}
+.btn{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#f9fafb;cursor:pointer}
+.btn:hover{background:#f3f4f6}
+.datechip{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* Board columns */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(18rem,20rem);gap:16px;align-items:start;overflow-x:auto;padding:16px 12px 24px}
+.container{max-width:1400px;margin:0 auto;width:100%}
+
+/* Stack "stack of notes" aesthetic */
+.stackCard{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--bg);text-align:left;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.04);overflow:hidden}
+.stackCard::before,.stackCard::after{content:"";position:absolute;inset:0;border:1px solid var(--line);border-radius:10px;background:#fff;z-index:-1}
+.stackCard::before{top:4px;left:4px;right:-4px;bottom:-4px}
+.stackCard::after{top:8px;left:8px;right:-8px;bottom:-8px}
+
+/* Note previews */
+.noteCard{border:1px solid var(--line);border-radius:10px;background:#fff;padding:12px;overflow:hidden}
+.clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Comments */
+.comment{border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px}
+.comment-children{margin-left:28px;margin-top:8px}
