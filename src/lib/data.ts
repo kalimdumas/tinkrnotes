@@ -1,14 +1,17 @@
 import { db, isClient, Category, Stack, Note, Comment } from './db';
 
 const ME = 'me';
+const uuid = () => crypto.randomUUID();
 
 /* seed */
 export async function seedDefaults() {
   if (!isClient || !db) return;
   if (await db.categories.count()) return;
   const now = new Date();
-  const names = ['Hobbies', 'Projects', 'Books', 'Thoughts'];
-  await db.categories.bulkAdd(names.map(name => ({ name, createdAt: now, updatedAt: now } as Category)));
+  const names = ['Hobbies', 'Projects', 'Media', 'Thoughts'];
+  await db.categories.bulkAdd(
+    names.map(name => ({ name, createdAt: now, updatedAt: now } as Category))
+  );
 }
 
 /* board */
@@ -22,7 +25,7 @@ export async function listStacksByCategory(categoryId: number): Promise<Stack[]>
 }
 export async function createStack(categoryId: number, title: string): Promise<number> {
   const now = new Date();
-  return db!.stacks.add({ title, categoryId, createdAt: now, updatedAt: now } as Stack);
+  return db!.stacks.add({ uid: uuid(), title, categoryId, createdAt: now, updatedAt: now } as Stack);
 }
 
 /* stacks+notes */
@@ -39,7 +42,7 @@ export async function listNotes(stackId: number, sort: NoteSort): Promise<Note[]
 }
 export async function createNote(stackId: number): Promise<number> {
   const now = new Date();
-  return db!.notes.add({ stackId, content: '', createdAt: now, updatedAt: now } as Note);
+  return db!.notes.add({ uid: uuid(), stackId, content: '', createdAt: now, updatedAt: now } as Note);
 }
 export async function getNote(id: number) { return db?.notes.get(id) ?? null; }
 export async function updateNote(id: number, content: string) {
@@ -55,15 +58,22 @@ export async function updateNote(id: number, content: string) {
 /* comments: top-level + one-level replies */
 export async function listTopComments(noteId: number): Promise<Comment[]> {
   if (!db) return [];
-  return db.comments.where({ noteId, parentId: null }).sortBy('createdAt').then(a => a.reverse());
+  const arr = await db.comments
+    .where('noteId').equals(noteId)
+    .and(c => c.parentId === null)
+    .sortBy('createdAt');
+  return arr.reverse();
 }
 export async function listReplies(noteId: number, parentId: number): Promise<Comment[]> {
   if (!db) return [];
-  return db.comments.where({ noteId, parentId }).sortBy('createdAt');
+  return db.comments
+    .where('parentId').equals(parentId)
+    .and(c => c.noteId === noteId)
+    .sortBy('createdAt');
 }
 export async function addComment(noteId: number, parentId: number | null, text: string): Promise<Comment> {
   const now = new Date();
-  const payload: Comment = { noteId, parentId, author: ME, text, createdAt: now };
+  const payload: Comment = { uid: uuid(), noteId, parentId, author: ME, text, createdAt: now };
   const id = await db!.comments.add(payload as any);
   return { ...payload, id };
 }

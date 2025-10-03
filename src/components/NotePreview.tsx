@@ -7,11 +7,10 @@ export function NotePreview(props: { note: Note; onOpen: () => void }) {
     <button class="noteCard" onClick={props.onOpen} title="Open note">
       <div class="spread">
         <div class="font-semibold" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          {titleOf(props.note.content)}
+          {titleOf(snippet(props.note.content))}
         </div>
         <DateChip date={props.note.updatedAt} />
       </div>
-      <div class="clamp-3" style="margin-top:6px;color:#374151">{snippet(props.note.content)}</div>
     </button>
   );
 }

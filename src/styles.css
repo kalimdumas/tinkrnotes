@@ -5,7 +5,7 @@
 .row{display:flex;align-items:center;gap:8px}
 .spread{display:flex;align-items:center;gap:8px;justify-content:space-between}
 .input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:#fff}
-.btn{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#f9fafb;cursor:pointer}
+.btn{border:1px solid var(--line);width:100px;border-radius:8px;padding:6px 10px;background:#f9fafb;cursor:pointer}
 .btn:hover{background:#f3f4f6}
 .datechip{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
 

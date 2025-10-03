@@ -12,7 +12,6 @@ export function StackCard(props: { stack: Stack }) {
           </div>
           <DateChip date={props.stack.updatedAt} />
         </div>
-        <div class="row" style="margin-top:6px;color:var(--muted);font-size:12px">Notestack</div>
       </div>
     </Link>
   );
